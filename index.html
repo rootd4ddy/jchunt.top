@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHunt - Active Directory Attack Path Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #e5e5e5;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            padding: 32px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #fff;
+        }
+
+        section {
+            padding: 80px 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        section:last-of-type {
+            border-bottom: none;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 600;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            color: #fff;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: 32px;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: #fff;
+            margin-bottom: 32px;
+        }
+
+        .subheadline {
+            font-size: 20px;
+            color: #a0a0a0;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .highlight {
+            color: #4a9eff;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #fff;
+            color: #0a0a0a;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background: #e5e5e5;
+            transform: translateY(-1px);
+        }
+
+        .problem-list {
+            margin: 32px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .problem-item {
+            padding: 24px;
+            background: #121212;
+            border-left: 2px solid #2a2a2a;
+            border-radius: 4px;
+        }
+
+        .problem-item h3 {
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .problem-item p {
+            color: #a0a0a0;
+            font-size: 15px;
+        }
+
+        .credential-box {
+            background: #121212;
+            padding: 32px;
+            border-radius: 8px;
+            margin: 32px 0;
+        }
+
+        .credential-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .credential-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .credential-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .credential-value {
+            font-size: 16px;
+            color: #e5e5e5;
+            line-height: 1.5;
+        }
+
+        .outcome {
+            background: linear-gradient(135deg, #1a2a3a 0%, #1a1a2a 100%);
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #2a3a4a;
+        }
+
+        .outcome-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #4a9eff;
+            margin-bottom: 8px;
+        }
+
+        .outcome-text {
+            font-size: 18px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .audit-process {
+            display: grid;
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .process-step {
+            background: #121212;
+            padding: 28px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .step-number {
+            font-size: 14px;
+            color: #4a9eff;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-description {
+            color: #a0a0a0;
+            font-size: 15px;
+        }
+
+        .guarantee-box {
+            background: linear-gradient(135deg, #1a2a1a 0%, #1a1a1a 100%);
+            padding: 32px;
+            border-radius: 8px;
+            border: 1px solid #2a3a2a;
+            margin: 40px 0;
+        }
+
+        .guarantee-box h3 {
+            color: #6fd46f;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .guarantee-box p {
+            color: #d0d0d0;
+            font-size: 16px;
+        }
+
+        .value-note {
+            font-size: 15px;
+            color: #888;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #1a1a1a;
+        }
+
+        footer {
+            padding: 60px 0 40px;
+            text-align: center;
+        }
+
+        footer p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 36px;
+            }
+
+            h2 {
+                font-size: 28px;
+            }
+
+            .subheadline {
+                font-size: 18px;
+            }
+
+            section {
+                padding: 60px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">JCHunt</div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section>
+        <div class="container">
+            <h1>Find your hidden Active Directory attack paths before ransomware operators do.</h1>
+            <p class="subheadline">
+                BloodHound-style attack-path analysis that surfaces exploitable chains from legacy groups, stale domain trusts, and tier-0 misconfigurations — before your EDR ever alerts.
+            </p>
+            <a href="#audit" class="cta-button">Request Free AD Attack-Path Audit</a>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section>
+        <div class="container">
+            <h2>Attackers chain low-privilege access long before detection.</h2>
+            <div class="problem-list">
+                <div class="problem-item">
+                    <h3>Legacy Groups & Nested Permissions</h3>
+                    <p>Service accounts and contractor access accumulate over years. One forgotten nested group grants DCSync from a helpdesk ticket system.</p>
+                </div>
+                <div class="problem-item">
+                    <h3>Stale Trusts & Acquired Entities</h3>
+                    <p>M&A activity leaves bidirectional trusts open. Attackers pivot through subsidiaries acquired three years ago that IT forgot existed.</p>
+                </div>
+                <div class="problem-item">
+                    <h3>Tier Model Drift</h3>
+                    <p>Tier-0 assets are supposed to be isolated. In practice, admin workstations are domain-joined and helpdesk has local admin on DCs through GPO inheritance.</p>
+                </div>
+            </div>
+            <p class="subheadline" style="margin-top: 40px; margin-bottom: 0;">
+                These paths exist in production right now. They don't trigger alerts. Auditors will find them. Ransomware operators already have.
+            </p>
+        </div>
+    </section>
+
+    <!-- Credibility Section -->
+    <section>
+        <div class="container">
+            <h2>Built by a Fortune 3 Active Directory security specialist.</h2>
+            <div class="credential-box">
+                <div class="credential-item">
+                    <div class="credential-label">Background</div>
+                    <div class="credential-value">Former internal security architect at a Fortune 3 enterprise, responsible for hardening hybrid Active Directory environments across global operations.</div>
+                </div>
+                <div class="credential-item">
+                    <div class="credential-label">Specialization</div>
+                    <div class="credential-value">Deep operational experience with BloodHound Enterprise, AD tiering models, and identity attack-path remediation at scale.</div>
+                </div>
+                <div class="credential-item">
+                    <div class="outcome">
+                        <div class="outcome-label">Representative Engagement</div>
+                        <div class="outcome-text">Remediated 400+ exploitable attack paths across 12 acquired entities in 90 days.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Free Audit Section -->
+    <section id="audit">
+        <div class="container">
+            <h2>Free AD Attack-Path Audit — No Sales Call Required.</h2>
+            <p class="subheadline">
+                A low-effort, high-signal engagement designed for security leaders who want visibility before committing budget.
+            </p>
+
+            <div class="audit-process">
+                <div class="process-step">
+                    <div class="step-number">STEP 1</div>
+                    <div class="step-title">Client Runs SharpHound Collection</div>
+                    <div class="step-description">Self-service data collection takes 15–20 minutes. No agents. No domain changes. Standard read-only LDAP queries.</div>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">STEP 2</div>
+                    <div class="step-title">Deep Attack-Path Analysis</div>
+                    <div class="step-description">Full graph analysis identifying privilege escalation paths, tier violations, and stale trust exploitation vectors.</div>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">STEP 3</div>
+                    <div class="step-title">15–30 Minute Debrief</div>
+                    <div class="step-description">Concrete findings delivered in a brief technical walkthrough. No fluff. No upsell deck.</div>
+                </div>
+            </div>
+
+            <div class="guarantee-box">
+                <h3>Guaranteed Finding</h3>
+                <p>Every audit surfaces at least one critical attack path or identity misconfiguration. If your environment is truly hardened, you'll know with confidence.</p>
+            </div>
+
+            <p class="value-note">
+                This level of attack-path visibility typically costs $25K+ as part of a formal security assessment. We provide it free to qualified healthcare and regulated organizations because remediation is where the real work begins.
+            </p>
+
+            <div style="margin-top: 48px; text-align: center;">
+                <a href="mailto:jacob.compton@jchunt.top?subject=Free%20AD%20Attack-Path%20Audit%20Request&body=Name:%0D%0ACompany:%0D%0AWork%20Email:%0D%0A%0D%0AI'm%20interested%20in%20the%20free%20Active%20Directory%20attack-path%20audit." class="cta-button">Get the Free Audit Runbook</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>JCHunt — Active Directory Attack-Path Analysis</p>
+            <p><a href="mailto:jacob.compton@jchunt.top" style="color: #666; text-decoration: none;">jacob.compton@jchunt.top</a></p>
+        </div>
+    </footer>
+</body>
+</html>
